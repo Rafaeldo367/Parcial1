@@ -2,11 +2,7 @@
 /**
   ******************************************************************************
   * @file           : main.c
-  * @brief          : Programa principal con 3 canciones para Buzzer Pasivo
-  ******************************************************************************
-  * Canción 1: La Gata Bajo la Lluvia
-  * Canción 2: MAMIII (Karol G & Becky G)
-  * Canción 3: Careless Whisper (George Michael)
+  * @brief          : Parcial Sistemas Embebidos (A prueba de cambios de pines y Ánodo Común)
   ******************************************************************************
   */
 /* USER CODE END Header */
@@ -105,6 +101,15 @@ void delay_us_dwt(uint32_t reta);
 void Sound_play(uint32_t frec, uint32_t dura);
 void reproducir_secuencia(const uint16_t notas[], const uint16_t duraciones[], uint16_t total);
 
+// Función auxiliar para el display de 7 segmentos
+void mostrar_7seg(uint8_t a, uint8_t b, uint8_t c, uint8_t d, uint8_t e, uint8_t f, uint8_t g);
+
+// Prototipos de las funciones del parcial
+void funcion_conteo_0_9(uint16_t retardo);
+void funcion_palabra(uint16_t retardo);
+void luces_der_izq(uint32_t velocidad);
+void luces_centro_extremos(uint32_t velocidad);
+
 void cancion_1_LaGataBajoLaLluvia(void);
 void cancion_2_MAMIII(void);
 void cancion_3_CarelessWhisper(void);
@@ -139,14 +144,14 @@ void Sound_play(uint32_t frec, uint32_t dura)
 
   while (repe--)
   {
-    HAL_GPIO_WritePin(parlante_GPIO_Port, parlante_Pin, GPIO_PIN_SET);
+    // A prueba de balas: usa buzzerPin_GPIO_Port generado por CubeMX
+    HAL_GPIO_WritePin(buzzerPin_GPIO_Port, buzzerPin_Pin, GPIO_PIN_SET);
     delay_us_dwt(dela);
-    HAL_GPIO_WritePin(parlante_GPIO_Port, parlante_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(buzzerPin_GPIO_Port, buzzerPin_Pin, GPIO_PIN_RESET);
     delay_us_dwt(dela);
   }
 }
 
-// Reproductor genérico de secuencias
 void reproducir_secuencia(const uint16_t notas[], const uint16_t duraciones[], uint16_t total)
 {
   for (uint16_t i = 0; i < total; i++)
@@ -154,6 +159,173 @@ void reproducir_secuencia(const uint16_t notas[], const uint16_t duraciones[], u
     Sound_play(notas[i], duraciones[i]);
     HAL_Delay(duraciones[i]); // Pausa equivalente entre notas
   }
+}
+
+// =========================================================================
+// FUNCIÓN AUXILIAR PARA EL DISPLAY DE 7 SEGMENTOS
+// =========================================================================
+// Usa _GPIO_Port para cada segmento. Ya no importa si están en PA o PB.
+void mostrar_7seg(uint8_t a, uint8_t b, uint8_t c, uint8_t d, uint8_t e, uint8_t f, uint8_t g)
+{
+  HAL_GPIO_WritePin(A7s_GPIO_Port, A7s_Pin, a ? GPIO_PIN_SET : GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(B7s_GPIO_Port, B7s_Pin, b ? GPIO_PIN_SET : GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(C7s_GPIO_Port, C7s_Pin, c ? GPIO_PIN_SET : GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(D7s_GPIO_Port, D7s_Pin, d ? GPIO_PIN_SET : GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(E7s_GPIO_Port, E7s_Pin, e ? GPIO_PIN_SET : GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(F7s_GPIO_Port, F7s_Pin, f ? GPIO_PIN_SET : GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(G7s_GPIO_Port, G7s_Pin, g ? GPIO_PIN_SET : GPIO_PIN_RESET);
+}
+
+// =========================================================================
+// 1. FUNCION DE CONTEO (0 al 9) - ÁNODO COMÚN (0 enciende, 1 apaga)
+// =========================================================================
+void funcion_conteo_0_9(uint16_t retardo) {
+  // 0
+  mostrar_7seg(0, 0, 0, 0, 0, 0, 1);
+  HAL_Delay(retardo);
+  
+  // 1
+  mostrar_7seg(1, 0, 0, 1, 1, 1, 1);
+  HAL_Delay(retardo);
+  
+  // 2
+  mostrar_7seg(0, 0, 1, 0, 0, 1, 0);
+  HAL_Delay(retardo);
+  
+  // 3
+  mostrar_7seg(0, 0, 0, 0, 1, 1, 0);
+  HAL_Delay(retardo);
+  
+  // 4
+  mostrar_7seg(1, 0, 0, 1, 1, 0, 0);
+  HAL_Delay(retardo);
+  
+  // 5
+  mostrar_7seg(0, 1, 0, 0, 1, 0, 0);
+  HAL_Delay(retardo);
+  
+  // 6
+  mostrar_7seg(0, 1, 0, 0, 0, 0, 0);
+  HAL_Delay(retardo);
+  
+  // 7
+  mostrar_7seg(0, 0, 0, 1, 1, 1, 1);
+  HAL_Delay(retardo);
+  
+  // 8
+  mostrar_7seg(0, 0, 0, 0, 0, 0, 0);
+  HAL_Delay(retardo);
+  
+  // 9
+  mostrar_7seg(0, 0, 0, 0, 1, 0, 0);
+  HAL_Delay(retardo);
+  
+  // Apagar todo al finalizar (en ánodo común se apaga con 1)
+  mostrar_7seg(1, 1, 1, 1, 1, 1, 1);
+}
+
+// =========================================================================
+// 2. FUNCION DE PALABRA (SISTEMAS) - ÁNODO COMÚN
+// =========================================================================
+void funcion_palabra(uint16_t retardo) {
+  // Letra S 
+  mostrar_7seg(0, 1, 0, 0, 1, 0, 0);
+  HAL_Delay(retardo);
+
+  // Letra I 
+  mostrar_7seg(1, 0, 0, 1, 1, 1, 1);
+  HAL_Delay(retardo);
+
+  // Letra S 
+  mostrar_7seg(0, 1, 0, 0, 1, 0, 0);
+  HAL_Delay(retardo);
+
+  // Letra T 
+  mostrar_7seg(1, 1, 1, 0, 0, 0, 0);
+  HAL_Delay(retardo);
+
+  // Letra E 
+  mostrar_7seg(0, 1, 1, 0, 0, 0, 0);
+  HAL_Delay(retardo);
+
+  // Letra M (Aproximación con A, D, G)
+  mostrar_7seg(0, 1, 1, 0, 1, 1, 0);
+  HAL_Delay(retardo);
+
+  // Letra A 
+  mostrar_7seg(0, 0, 0, 1, 0, 0, 0);
+  HAL_Delay(retardo);
+
+  // Letra S 
+  mostrar_7seg(0, 1, 0, 0, 1, 0, 0);
+  HAL_Delay(retardo);
+  
+  // Apagar todo al finalizar
+  mostrar_7seg(1, 1, 1, 1, 1, 1, 1);
+}
+
+// =========================================================================
+// 3. JUEGO DE LUCES (Derecha a Izquierda)
+// =========================================================================
+void luces_der_izq(uint32_t velocidad) {
+  // Apagar todos los LEDs primero a prueba de balas (usando _GPIO_Port)
+  HAL_GPIO_WritePin(led1_GPIO_Port, led1_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(led2_GPIO_Port, led2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(led3_GPIO_Port, led3_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(led4_GPIO_Port, led4_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(led5_GPIO_Port, led5_Pin, GPIO_PIN_RESET);
+
+  // Encender y apagar uno a uno desde led5 a led1
+  HAL_GPIO_WritePin(led5_GPIO_Port, led5_Pin, GPIO_PIN_SET);
+  HAL_Delay(velocidad);
+  HAL_GPIO_WritePin(led5_GPIO_Port, led5_Pin, GPIO_PIN_RESET); 
+  
+  HAL_GPIO_WritePin(led4_GPIO_Port, led4_Pin, GPIO_PIN_SET);
+  HAL_Delay(velocidad);
+  HAL_GPIO_WritePin(led4_GPIO_Port, led4_Pin, GPIO_PIN_RESET); 
+  
+  HAL_GPIO_WritePin(led3_GPIO_Port, led3_Pin, GPIO_PIN_SET);
+  HAL_Delay(velocidad);
+  HAL_GPIO_WritePin(led3_GPIO_Port, led3_Pin, GPIO_PIN_RESET); 
+  
+  HAL_GPIO_WritePin(led2_GPIO_Port, led2_Pin, GPIO_PIN_SET);
+  HAL_Delay(velocidad);
+  HAL_GPIO_WritePin(led2_GPIO_Port, led2_Pin, GPIO_PIN_RESET); 
+  
+  HAL_GPIO_WritePin(led1_GPIO_Port, led1_Pin, GPIO_PIN_SET);
+  HAL_Delay(velocidad);
+  HAL_GPIO_WritePin(led1_GPIO_Port, led1_Pin, GPIO_PIN_RESET); 
+}
+
+// =========================================================================
+// 4. JUEGO DE LUCES (Centro a Extremos)
+// =========================================================================
+void luces_centro_extremos(uint32_t velocidad) {
+  // Apagar todos los LEDs al inicio (uno por uno para que funcione siempre)
+  HAL_GPIO_WritePin(led1_GPIO_Port, led1_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(led2_GPIO_Port, led2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(led3_GPIO_Port, led3_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(led4_GPIO_Port, led4_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(led5_GPIO_Port, led5_Pin, GPIO_PIN_RESET);
+
+  // Centro (led3)
+  HAL_GPIO_WritePin(led3_GPIO_Port, led3_Pin, GPIO_PIN_SET);
+  HAL_Delay(velocidad);
+  HAL_GPIO_WritePin(led3_GPIO_Port, led3_Pin, GPIO_PIN_RESET); 
+  
+  // Medios (led2 y led4)
+  HAL_GPIO_WritePin(led2_GPIO_Port, led2_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(led4_GPIO_Port, led4_Pin, GPIO_PIN_SET);
+  HAL_Delay(velocidad);
+  HAL_GPIO_WritePin(led2_GPIO_Port, led2_Pin, GPIO_PIN_RESET); 
+  HAL_GPIO_WritePin(led4_GPIO_Port, led4_Pin, GPIO_PIN_RESET); 
+  
+  // Extremos (led1 y led5)
+  HAL_GPIO_WritePin(led1_GPIO_Port, led1_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(led5_GPIO_Port, led5_Pin, GPIO_PIN_SET);
+  HAL_Delay(velocidad);
+  HAL_GPIO_WritePin(led1_GPIO_Port, led1_Pin, GPIO_PIN_RESET); 
+  HAL_GPIO_WritePin(led5_GPIO_Port, led5_Pin, GPIO_PIN_RESET); 
 }
 
 // =========================================================================
@@ -298,16 +470,36 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    // Canción 1
-    cancion_1_LaGataBajoLaLluvia();
-    HAL_Delay(2000);
+    // -------------------------------------------------------------
+    // EJECUCIÓN SECUENCIAL DE LAS REQUERIMIENTOS DEL PARCIAL
+    // -------------------------------------------------------------
+    
+    // 1. Conteo 0 al 9 en el display de 7 segmentos (1 segundo por número)
+    funcion_conteo_0_9(1000);
+    HAL_Delay(1000);
 
-    // Canción 2
+    // 2. Palabra SISTEMAS en el display (500 ms por letra)
+    funcion_palabra(500);
+    HAL_Delay(1000);
+
+    // 3. Juego de luces Derecha a Izquierda
+    luces_der_izq(200);
+    HAL_Delay(1000);
+
+    // 4. Juego de luces Centro a Extremos
+    luces_centro_extremos(300);
+    HAL_Delay(1000);
+
+    // 5. Melodía MAMI (Karol G)
     cancion_2_MAMIII();
-    HAL_Delay(2000);
+    HAL_Delay(1000);
 
-    // Canción 3
+    // 6. Melodía Take On Me / Careless Whisper
     cancion_3_CarelessWhisper();
+    HAL_Delay(1000);
+
+    // 7. Melodía La Gata bajo la lluvia
+    cancion_1_LaGataBajoLaLluvia();
     HAL_Delay(2000);
 
     /* USER CODE END WHILE */
@@ -375,26 +567,26 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, led1_Pin|led2_Pin|led3_Pin|led4_Pin
-                          |led5_Pin|F7s_Pin|E7s_Pin|D7s_Pin
-                          |C7s_Pin|B7s_Pin|A7s_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, G7s_Pin|F7s_Pin|A7s_Pin|B7s_Pin
+                          |led1_Pin|led2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, buzzerPin_Pin|G7s_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, led3_Pin|led4_Pin|led5_Pin|buzzerPin_Pin
+                          |C7s_Pin|D7s_Pin|E7s_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : led1_Pin led2_Pin led3_Pin led4_Pin
-                           led5_Pin F7s_Pin E7s_Pin D7s_Pin
-                           C7s_Pin B7s_Pin A7s_Pin */
-  GPIO_InitStruct.Pin = led1_Pin|led2_Pin|led3_Pin|led4_Pin
-                          |led5_Pin|F7s_Pin|E7s_Pin|D7s_Pin
-                          |C7s_Pin|B7s_Pin|A7s_Pin;
+  /*Configure GPIO pins : G7s_Pin F7s_Pin A7s_Pin B7s_Pin
+                           led1_Pin led2_Pin */
+  GPIO_InitStruct.Pin = G7s_Pin|F7s_Pin|A7s_Pin|B7s_Pin
+                          |led1_Pin|led2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : buzzerPin_Pin G7s_Pin */
-  GPIO_InitStruct.Pin = buzzerPin_Pin|G7s_Pin;
+  /*Configure GPIO pins : led3_Pin led4_Pin led5_Pin buzzerPin_Pin
+                           C7s_Pin D7s_Pin E7s_Pin */
+  GPIO_InitStruct.Pin = led3_Pin|led4_Pin|led5_Pin|buzzerPin_Pin
+                          |C7s_Pin|D7s_Pin|E7s_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -416,7 +608,8 @@ static void MX_GPIO_Init(void)
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
+  /* User can add his own implementation to report the file name and line number,
+     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
   __disable_irq();
   while (1)
   {
