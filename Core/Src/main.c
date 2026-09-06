@@ -2,7 +2,9 @@
 /**
   ******************************************************************************
   * @file           : main.c
-  * @brief          : Parcial Sistemas Embebidos (A prueba de cambios de pines y Ánodo Común)
+  * @brief          : Parcial 1  | Sistemas Embebidos - Rafael Diaz Ortiz y Luis Perez Castro
+
+
   ******************************************************************************
   */
 /* USER CODE END Header */
@@ -21,7 +23,13 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+
+//Aqui vamos a guardamos todas las constantes del codigo, como las frecuencias de las notas musicales
+
 // --- DICCIONARIO ÚNICO DE FRECUENCIAS (en Hz) ---
+
+Un define es decirle al compilador Buscar y Reemplazar | no ocupa espacio en memoria | no es una variable
+
 #define Sil   5
 
 // Octava 1 y 2 (Notas Graves)
@@ -89,6 +97,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+//Aqui declaramos las variables globales que vamos a usar en el codigo, como la variable pasos para el delay de microsegundos
 uint32_t pasos;
 /* USER CODE END PV */
 
@@ -96,6 +105,7 @@ uint32_t pasos;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 /* USER CODE BEGIN PFP */
+//prototipado de funciones como buena practica, para que el compilador sepa que existen antes de ser usadas
 void delay_us_dwt_init(void);
 void delay_us_dwt(uint32_t reta);
 void Sound_play(uint32_t frec, uint32_t dura);
@@ -107,7 +117,9 @@ void mostrar_7seg(uint8_t a, uint8_t b, uint8_t c, uint8_t d, uint8_t e, uint8_t
 // Prototipos de las funciones del parcial
 void funcion_conteo_0_9(uint16_t retardo);
 void funcion_palabra(uint16_t retardo);
+
 void luces_der_izq(uint32_t velocidad);
+void luces_izq_der(uint32_t velocidad);
 void luces_centro_extremos(uint32_t velocidad);
 
 void cancion_1_LaGataBajoLaLluvia(void);
@@ -118,7 +130,24 @@ void cancion_3_CarelessWhisper(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+//Aqui si va ya el codigo que se va a ejecutar, como las funciones del buzzer, display y luces
+
+/*
+Notas:
+
+uint8_t: Es un tipo de dato entero sin signo de 8 bits, que puede almacenar valores desde 0 hasta 255. Se utiliza para representar números pequeños o valores que no requieren signo.
+int8_t: Es un tipo de dato entero con signo de 8 bits, que puede almacenar valores desde -128 hasta 127. Se utiliza para representar números pequeños que pueden ser negativos.
+
+uint16_t: Es un tipo de dato entero sin signo de 16 bits, que puede almacenar valores desde 0 hasta 65535. Se utiliza para representar números más grandes que uint8_t, pero aún sin signo.
+int16_t: Es un tipo de dato entero con signo de 16 bits, que puede almacenar valores desde -32768 hasta 32767. Se utiliza para representar números más grandes que int8_t.
+
+uint32_t: Es un tipo de dato entero sin signo de 32 bits, que puede almacenar valores desde 0 hasta 4294967295. Se utiliza para representar números aún más grandes que uint16_t, pero aun sin signo.
+int32_t: Es un tipo de dato entero con signo de 32 bits, que puede almacenar valores desde -2147483648 hasta 2147483647. Se utiliza para representar números aún más grandes que int16_t.
+
+*/
+
 // --- FUNCIONES DEL BUZZER ---
+//Con estas funciones podemos hacer que el buzzer suene a una frecuencia y duración determinada, y tambien podemos reproducir secuencias de notas y duraciones | Cabe recalcar que las primeras funciones son para inicializar el delay de microsegundos y para hacer el delay de microsegundos, ya que el HAL_Delay solo permite milisegundos
 void delay_us_dwt_init(void)
 {
   CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
@@ -144,7 +173,6 @@ void Sound_play(uint32_t frec, uint32_t dura)
 
   while (repe--)
   {
-    // A prueba de balas: usa buzzerPin_GPIO_Port generado por CubeMX
     HAL_GPIO_WritePin(buzzerPin_GPIO_Port, buzzerPin_Pin, GPIO_PIN_SET);
     delay_us_dwt(dela);
     HAL_GPIO_WritePin(buzzerPin_GPIO_Port, buzzerPin_Pin, GPIO_PIN_RESET);
@@ -164,7 +192,8 @@ void reproducir_secuencia(const uint16_t notas[], const uint16_t duraciones[], u
 // =========================================================================
 // FUNCIÓN AUXILIAR PARA EL DISPLAY DE 7 SEGMENTOS
 // =========================================================================
-// Usa _GPIO_Port para cada segmento. Ya no importa si están en PA o PB.
+
+//Con esta funcion nos vamos a ahorrar escribir Hal_GPIO_WritePin muchas veces, ya que solo tenemos que llamar a esta funcion y pasarle los valores de los pines del display de 7 segmentos, y la funcion se encarga de escribir en los pines correspondientes
 void mostrar_7seg(uint8_t a, uint8_t b, uint8_t c, uint8_t d, uint8_t e, uint8_t f, uint8_t g)
 {
   HAL_GPIO_WritePin(A7s_GPIO_Port, A7s_Pin, a ? GPIO_PIN_SET : GPIO_PIN_RESET);
@@ -268,7 +297,7 @@ void funcion_palabra(uint16_t retardo) {
 // 3. JUEGO DE LUCES (Derecha a Izquierda)
 // =========================================================================
 void luces_der_izq(uint32_t velocidad) {
-  // Apagar todos los LEDs primero a prueba de balas (usando _GPIO_Port)
+  // Apagar todos los LEDs primero
   HAL_GPIO_WritePin(led1_GPIO_Port, led1_Pin, GPIO_PIN_RESET);
   HAL_GPIO_WritePin(led2_GPIO_Port, led2_Pin, GPIO_PIN_RESET);
   HAL_GPIO_WritePin(led3_GPIO_Port, led3_Pin, GPIO_PIN_RESET);
@@ -299,6 +328,42 @@ void luces_der_izq(uint32_t velocidad) {
 
 // =========================================================================
 // 4. JUEGO DE LUCES (Centro a Extremos)
+// =========================================================================
+void luces_izq_der(uint32_t velocidad) {
+  // Apagar todos los LEDs primero
+  HAL_GPIO_WritePin(led1_GPIO_Port, led1_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(led2_GPIO_Port, led2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(led3_GPIO_Port, led3_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(led4_GPIO_Port, led4_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(led5_GPIO_Port, led5_Pin, GPIO_PIN_RESET);
+
+  // Encender y apagar uno a uno desde led1 a led5
+  HAL_GPIO_WritePin(led1_GPIO_Port, led1_Pin, GPIO_PIN_SET);
+  HAL_Delay(velocidad);
+  HAL_GPIO_WritePin(led1_GPIO_Port, led1_Pin, GPIO_PIN_RESET); 
+  
+  HAL_GPIO_WritePin(led2_GPIO_Port, led2_Pin, GPIO_PIN_SET);
+  HAL_Delay(velocidad);
+  HAL_GPIO_WritePin(led2_GPIO_Port, led2_Pin, GPIO_PIN_RESET); 
+  
+  HAL_GPIO_WritePin(led3_GPIO_Port, led3_Pin, GPIO_PIN_SET);
+  HAL_Delay(velocidad);
+  HAL_GPIO_WritePin(led3_GPIO_Port, led3_Pin, GPIO_PIN_RESET); 
+  
+  HAL_GPIO_WritePin(led4_GPIO_Port, led4_Pin, GPIO_PIN_SET);
+  HAL_Delay(velocidad);
+  HAL_GPIO_WritePin(led4_GPIO_Port, led4_Pin, GPIO_PIN_RESET); 
+  
+  HAL_GPIO_WritePin(led5_GPIO_Port, led5_Pin, GPIO_PIN_SET);
+  HAL_Delay(velocidad);
+  HAL_GPIO_WritePin(led5_GPIO_Port, led5_Pin, GPIO_PIN_RESET); 
+}
+
+
+
+
+// =========================================================================
+// 5. JUEGO DE LUCES (Centro a Extremos)
 // =========================================================================
 void luces_centro_extremos(uint32_t velocidad) {
   // Apagar todos los LEDs al inicio (uno por uno para que funcione siempre)
@@ -331,6 +396,8 @@ void luces_centro_extremos(uint32_t velocidad) {
 // =========================================================================
 // CANCIÓN 1: LA GATA BAJO LA LLUVIA
 // =========================================================================
+
+//para las canciones, definimos el tempo y las duraciones de las notas, y luego definimos los arreglos de notas y duraciones, y finalmente llamamos a la funcion reproducir_secuencia para que suene la cancion
 void cancion_1_LaGataBajoLaLluvia(void)
 {
   #define TEMPO_GATA (88 * 2)
@@ -471,34 +538,40 @@ int main(void)
   while (1)
   {
     // -------------------------------------------------------------
-    // EJECUCIÓN SECUENCIAL DE LAS REQUERIMIENTOS DEL PARCIAL
+    // EJECUCIÓN SECUENCIAL DE LAS REQUERIMIENTOS DEL PARCIAL (solo 6)
     // -------------------------------------------------------------
     
     // 1. Conteo 0 al 9 en el display de 7 segmentos (1 segundo por número)
     funcion_conteo_0_9(1000);
     HAL_Delay(1000);
+    funcion_conteo_0_9(500);
+    HAL_Delay(1000);
 
     // 2. Palabra SISTEMAS en el display (500 ms por letra)
-    funcion_palabra(500);
-    HAL_Delay(1000);
+    /*funcion_palabra(500);
+    HAL_Delay(1000);  */
 
     // 3. Juego de luces Derecha a Izquierda
     luces_der_izq(200);
     HAL_Delay(1000);
 
-    // 4. Juego de luces Centro a Extremos
+    // 4. Juego de luces Izquierda a Derecha
+    /*luces_izq_der(500);
+    HAL_Delay(1000); */
+
+    // 5. Juego de luces Centro a Extremos
     luces_centro_extremos(300);
     HAL_Delay(1000);
 
-    // 5. Melodía MAMI (Karol G)
+    // 6. Melodía MAMI (Karol G)
     cancion_2_MAMIII();
     HAL_Delay(1000);
 
-    // 6. Melodía Take On Me / Careless Whisper
+    // 7. Melodía Take On Me / Careless Whisper
     cancion_3_CarelessWhisper();
     HAL_Delay(1000);
 
-    // 7. Melodía La Gata bajo la lluvia
+    // 8. Melodía La Gata bajo la lluvia
     cancion_1_LaGataBajoLaLluvia();
     HAL_Delay(2000);
 
