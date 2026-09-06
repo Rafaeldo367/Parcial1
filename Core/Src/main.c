@@ -28,7 +28,7 @@
 
 // --- DICCIONARIO ÚNICO DE FRECUENCIAS (en Hz) ---
 
-Un define es decirle al compilador Buscar y Reemplazar | no ocupa espacio en memoria | no es una variable
+//Un define es decirle al compilador Buscar y Reemplazar | no ocupa espacio en memoria | no es una variable
 
 #define Sil   5
 
